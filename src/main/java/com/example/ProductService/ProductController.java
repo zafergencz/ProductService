@@ -3,11 +3,14 @@ import java.util.*;
 
 import com.example.ProductService.model.Product;
 import com.example.ProductService.repository.ProductRepository;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@Api(value = "User Api documentation")
 @CrossOrigin(origins = "http://localhost:8081")
 @RestController
 @RequestMapping("/api")
@@ -20,6 +23,7 @@ public class ProductController {
     }
 
     @GetMapping("/products")
+    @ApiOperation(value = "Get Products By Type Or Color")
     public ResponseEntity<List<Product>> getProducts(@RequestParam(required = false) String type,@RequestParam(required = false) String color) {
 
         try {
@@ -46,6 +50,7 @@ public class ProductController {
     }
 
     @GetMapping("/products/{id}")
+    @ApiOperation(value = "Get Products By Unique Id")
     public ResponseEntity<Product> getProductById(@PathVariable long id) {
         try{
             Product product = productRepository.findById(id).get();
@@ -56,6 +61,7 @@ public class ProductController {
     }
 
     @PostMapping(path = "products")
+    @ApiOperation(value = "Create A New Product")
     public ResponseEntity<Product> createProduct(@RequestBody Product product){
         try{
             Product _product = productRepository
@@ -67,6 +73,7 @@ public class ProductController {
     }
 
     @DeleteMapping("products/{id}")
+    @ApiOperation(value = "Delete A Product By Id")
     public ResponseEntity<HttpStatus> deleteProduct(@PathVariable long id){
         try {
             productRepository.deleteById(id);
@@ -77,6 +84,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/products")
+    @ApiOperation(value = "Delete All Products")
     public ResponseEntity<HttpStatus> deleteAllProducts() {
         try {
             productRepository.deleteAll();
@@ -88,6 +96,7 @@ public class ProductController {
     }
 
     @PutMapping("/products/{id}")
+    @ApiOperation(value = "Update A Specific Product Using Id")
     public ResponseEntity<Product> updateProduct(@RequestBody Product entity, @PathVariable long id){
 
         Optional<Product> productData = productRepository.findById(id);

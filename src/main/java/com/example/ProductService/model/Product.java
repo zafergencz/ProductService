@@ -1,30 +1,40 @@
 package com.example.ProductService.model;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 import javax.persistence.*;
 import java.util.Date;
 
+@ApiModel(value = "Product Api model documentation", description = "Model")
 @Entity
 @Table(name = "products")
 public class Product {
+    @ApiModelProperty(value = "Unique id field of product object")
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
+    @ApiModelProperty(value = "Product type")
     @Column(name = "type")
     private String type;
 
+    @ApiModelProperty(value = "Product color")
     @Column(name = "color")
     private String color;
 
+    @ApiModelProperty(value = "Product name")
     @Column(name = "name")
     private String name;
 
+    @ApiModelProperty(value = "Product detail")
     @Column(name = "detail")
     private String detail;
 
+    @ApiModelProperty(value = "Product create date")
     @Column(name = "createDate")
     private Date createDate;
 
+    @ApiModelProperty(value = "Product update date")
     @Column(name = "updateDate")
     private Date updateDate;
 
