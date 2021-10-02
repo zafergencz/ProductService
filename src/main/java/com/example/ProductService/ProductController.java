@@ -1,75 +1,108 @@
 package com.example.ProductService;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.http.MediaType;
+import com.example.ProductService.model.Product;
+import com.example.ProductService.repository.ProductRepository;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.websocket.server.PathParam;
-
+@CrossOrigin(origins = "http://localhost:8081")
 @RestController
+@RequestMapping("/api")
 public class ProductController {
-    private final AtomicLong counter = new AtomicLong();
-    ArrayList<ProductEntity> productEntityList = new ArrayList<>();
+
+    @Autowired
+    ProductRepository productRepository;
 
     ProductController(){
     }
 
     @GetMapping("/products")
-    public ArrayList<ProductEntity> products(@RequestParam(defaultValue = "*") String type,@RequestParam(defaultValue = "*") String color) {
+    public ResponseEntity<List<Product>> getProducts(@RequestParam(required = false) String type,@RequestParam(required = false) String color) {
 
-        List<ProductEntity> tmpList;
-        if(color.equals("*") && type.equals("*")) {
-            return productEntityList;
-        }
-        else if(!color.equals("*") && type.equals("*")){
-            tmpList = productEntityList.stream().filter(x -> x.color.equals(color)).collect(Collectors.toList());
-        }
-        else if(color.equals("*") && !type.equals("*")){
-            tmpList = productEntityList.stream().filter(x -> x.type.equals(type)).collect(Collectors.toList());
-        }
-        else{
-            tmpList = productEntityList.stream().filter(x -> x.type.equals(type) && x.color.equals(color)).collect(Collectors.toList());
-        }
+        try {
+            List<Product> products = new ArrayList<>();
+            if(color == null && type == null){
+                productRepository.findAll().forEach(products::add);
+            }else if(color != null && type == null){
+                productRepository.findByColor(color).forEach(products::add);
+            }else if(color == null && type != null){
+                productRepository.findByType(type).forEach(products::add);
+            }else{
+                productRepository.findByColorAndType(color, type).forEach(products::add);
+            }
 
-        return new ArrayList<>(tmpList);
+            if (products.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+
+            return new ResponseEntity<>(products, HttpStatus.OK);
+
+        }catch (Exception e){
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
-    @GetMapping("/products/{id}")
-    public ArrayList<ProductEntity> products(@PathVariable long id) {
 
-        return new ArrayList<>(productEntityList.stream().filter(x -> x.id == id).collect(Collectors.toList()));
+    @GetMapping("/products/{id}")
+    public ResponseEntity<Product> getProductById(@PathVariable long id) {
+        try{
+            Product product = productRepository.findById(id).get();
+            return new ResponseEntity<>(product, HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PostMapping(path = "products")
-    public String create(@RequestBody ProductEntity entity){
-        entity.id = counter.incrementAndGet();
-        entity.createDate = new Date();
-        productEntityList.add(entity);
-        return  "OK";
+    public ResponseEntity<Product> createProduct(@RequestBody Product product){
+        try{
+            Product _product = productRepository
+                    .save(new Product(product.getName(), product.getDetail(), product.getType(), product.getColor(), new Date(), new Date()));
+            return new ResponseEntity<>(_product, HttpStatus.CREATED);
+        }catch (Exception e){
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @DeleteMapping("products/{id}")
-    public String delete(@PathVariable long id){
-        productEntityList.removeIf((x) -> (x.id == id));
-        return "OK";
+    public ResponseEntity<HttpStatus> deleteProduct(@PathVariable long id){
+        try {
+            productRepository.deleteById(id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @DeleteMapping("/products")
+    public ResponseEntity<HttpStatus> deleteAllProducts() {
+        try {
+            productRepository.deleteAll();
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
     }
 
     @PutMapping("/products/{id}")
-    public String put(@RequestBody ProductEntity entity, @PathVariable long id){
+    public ResponseEntity<Product> updateProduct(@RequestBody Product entity, @PathVariable long id){
 
-        productEntityList.forEach(x -> {
+        Optional<Product> productData = productRepository.findById(id);
 
-            if(x.id == id){
-                x.createDate = new Date();
-                x.type = entity.type;
-                x.name = entity.name;
-                x.color = entity.color;
-                return;
-            }
-        });
-        return "OK";
+        if (productData.isPresent()) {
+            Product _product = productData.get();
+            _product.setName(entity.getName());
+            _product.setDetail(entity.getDetail());
+            _product.setType(entity.getType());
+            _product.setColor(entity.getColor());
+            _product.setUpdateDate(new Date());
+
+            return new ResponseEntity<>(productRepository.save(_product), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 }

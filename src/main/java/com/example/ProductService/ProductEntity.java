@@ -8,4 +8,5 @@ public class ProductEntity {
     public String color;
     public String name;
     public Date createDate;
+    public Date updateDate;
 }
