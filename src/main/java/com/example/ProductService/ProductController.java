@@ -74,7 +74,6 @@ public class ProductController {
     @ApiOperation(value = "Create A New Product")
     public ResponseEntity<Product> createProduct(@RequestBody Product product){
         try{
-            logger.info("createProduct product= " + product.toString());
             Product _product = productRepository
                     .save(new Product(product.getName(), product.getDetail(), product.getType(), product.getColor(), new Date(), new Date()));
             return new ResponseEntity<>(_product, HttpStatus.CREATED);
@@ -88,7 +87,7 @@ public class ProductController {
     @ApiOperation(value = "Delete A Product By Id")
     public ResponseEntity<HttpStatus> deleteProduct(@PathVariable long id){
         try {
-            logger.info("deleteProduct id=" + id);
+            logger.info("deleteProduct");
             productRepository.deleteById(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (Exception e) {
@@ -115,7 +114,6 @@ public class ProductController {
     @ApiOperation(value = "Update A Specific Product Using Id")
     public ResponseEntity<Product> updateProduct(@RequestBody Product entity, @PathVariable long id){
 
-        logger.info("updateProduct entity = " + entity.toString() + " id = " +id);
         Optional<Product> productData = productRepository.findById(id);
 
         if (productData.isPresent()) {

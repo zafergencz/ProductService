@@ -3,6 +3,8 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.persistence.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @ApiModel(value = "Product Api model documentation", description = "Model")
@@ -106,9 +108,13 @@ public class Product {
 
     @Override
     public String toString() {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
+        String strCreateDate = dateFormat.format(createDate);
+        String strUpdateDate = dateFormat.format(updateDate);
+
         return "Product [id=" + id + ", name=" + name + ", detail=" + detail
-                + ", type=" + type + ", color="  + color + ", createDate=" + createDate.toString()
-                + ", updateDate=" + updateDate.toString() + "]";
+                + ", type=" + type + ", color="  + color + ", createDate=" + strCreateDate
+                + ", updateDate=" + strUpdateDate + "]";
     }
 
 }
