@@ -1,0 +1,9 @@
+http://localhost:8080/swagger-ui/#/
+
+./mvnw install -> for clean build jar file
+docker-compose build
+docker-compose up
+
+docker-compose down -> for closing
+
+https://spring.io/guides/topicals/spring-boot-docker/

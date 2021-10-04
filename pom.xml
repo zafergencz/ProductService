@@ -25,8 +25,23 @@
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-logging</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-log4j2</artifactId>
+				</exclusion>
 				<exclusion>
 					<groupId>org.springframework.boot</groupId>
 					<artifactId>spring-boot-starter-logging</artifactId>
@@ -72,12 +87,10 @@
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-api</artifactId>
-			<version>2.14.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
-			<version>2.14.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -96,58 +109,42 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-shade-plugin</artifactId >
-				<version>2.4.3</version>
+				<groupId>io.fabric8</groupId>
+				<artifactId>docker-maven-plugin</artifactId>
+				<version>0.26.0</version>
+				<extensions>true</extensions>
+				<configuration>
+					<verbose>true</verbose>
+					<images>
+						<image>
+							<name>${project.artifactId}</name>
+							<build>
+								<from>java:8-jdk-alpine</from>
+								<entryPoint>
+									<exec>
+										<args>java</args>
+										<args>-jar</args>
+										<args>/maven/${project.artifactId}-${project.version}.jar</args>
+									</exec>
+								</entryPoint>
+								<assembly>
+									<descriptorRef>artifact</descriptorRef>
+								</assembly>
+							</build>
+						</image>
+					</images>
+				</configuration>
 				<executions>
 					<execution>
-						<phase>package</phase>
-							<goals>
-								<goal>shade</goal >
-							</goals>
-							<configuration>
-								<filters>
-									<filter>
-										<artifact>*:*</artifact>
-										<excludes>
-											<exclude>META-INF/*.SF</exclude>
-											<exclude>META-INF/*.DSA</exclude>
-											<exclude>META-INF/*.RSA</exclude>
-											<exclude>**/Log4j2Plugins.dat</exclude>
-										</excludes>
-									</filter>
-									<createDependencyReducedPom>false</createDependencyReducedPom>
-								</filters>
-								<finalName>${artifactId}-${env}-${version}</finalName>
-								<transformers>
-									<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-										<mainClass>xxx.yyyy.zzz.Main</mainClass>
-									</transformer>
-									<transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-										<resource>META-INF/spring.handlers</resource>
-									</transformer>
-									<transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-										<resource>META-INF/spring.schemas</resource>
-									</transformer>
-									<transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer" >
-										<resource>META-INF/spring.tooling</resource>
-									</transformer>
-									<transformer implementation="org.apache.maven.plugins.shade.resource.ComponentsXmlResourceTransformer"/>
-									<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
-									<transformer implementation="com.github.edwgiz.mavenShadePlugin.log4j2CacheTransformer.PluginsCacheFileTransformer"/>
-								</transformers>
-							</configuration>
-						</execution>
-					</executions>
-					<dependencies>
-						<dependency>
-							<groupId>com.github.edwgiz </groupId>
-							<artifactId>maven-shade-plugin.log4j2-cachefile-transformer</artifactId>
-							<version>2.6.1</version>
-						</dependency>
-					</dependencies>
-				</plugin>
-			</plugins>
+						<id>build</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>build</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
 	</build>
 
 </project>
