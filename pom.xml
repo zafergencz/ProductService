@@ -64,15 +64,30 @@
             <version>4.12</version>
             <scope>test</scope>
         </dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-log4j2</artifactId>
-		</dependency>
+
 		<dependency>
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
 			<artifactId>jackson-dataformat-yaml</artifactId>
 		</dependency>
-    </dependencies>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>2.14.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>2.14.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+		</dependency>
+	</dependencies>
 
 	<build>
 		<plugins>
@@ -80,7 +95,59 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
-		</plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId >
+				<version>2.4.3</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+							<goals>
+								<goal>shade</goal >
+							</goals>
+							<configuration>
+								<filters>
+									<filter>
+										<artifact>*:*</artifact>
+										<excludes>
+											<exclude>META-INF/*.SF</exclude>
+											<exclude>META-INF/*.DSA</exclude>
+											<exclude>META-INF/*.RSA</exclude>
+											<exclude>**/Log4j2Plugins.dat</exclude>
+										</excludes>
+									</filter>
+									<createDependencyReducedPom>false</createDependencyReducedPom>
+								</filters>
+								<finalName>${artifactId}-${env}-${version}</finalName>
+								<transformers>
+									<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+										<mainClass>xxx.yyyy.zzz.Main</mainClass>
+									</transformer>
+									<transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+										<resource>META-INF/spring.handlers</resource>
+									</transformer>
+									<transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+										<resource>META-INF/spring.schemas</resource>
+									</transformer>
+									<transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer" >
+										<resource>META-INF/spring.tooling</resource>
+									</transformer>
+									<transformer implementation="org.apache.maven.plugins.shade.resource.ComponentsXmlResourceTransformer"/>
+									<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+									<transformer implementation="com.github.edwgiz.mavenShadePlugin.log4j2CacheTransformer.PluginsCacheFileTransformer"/>
+								</transformers>
+							</configuration>
+						</execution>
+					</executions>
+					<dependencies>
+						<dependency>
+							<groupId>com.github.edwgiz </groupId>
+							<artifactId>maven-shade-plugin.log4j2-cachefile-transformer</artifactId>
+							<version>2.6.1</version>
+						</dependency>
+					</dependencies>
+				</plugin>
+			</plugins>
 	</build>
 
 </project>

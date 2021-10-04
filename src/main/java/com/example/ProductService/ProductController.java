@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+
 @Api(value = "User Api documentation")
 @CrossOrigin(origins = "http://localhost:8081")
 @RestController
